@@ -7,7 +7,7 @@ using namespace cv;
 
 int main()
 {
-	VideoCapture cap("http://192.168.0.41:8080/video");
+	VideoCapture cap("http:///video");
 	if(!cap.isOpened())
 	{
 		cout << "Error opening" << endl;
