@@ -7,7 +7,7 @@ using namespace cv;
 
 int main()
 {
-	VideoCapture cap("http:///video");
+	VideoCapture cap("http://192.168.0.41:8080/video");
 	if(!cap.isOpened())
 	{
 		cout << "Error opening" << endl;
@@ -23,7 +23,7 @@ int main()
 		
 		imshow("Frame",frame);
 		
-		char c = (char)waitKey(25);
+		char c = (char)waitKey(33);
 		if(c==27)
 			break;
 	}
