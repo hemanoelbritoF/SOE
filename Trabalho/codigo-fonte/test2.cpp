@@ -11,7 +11,7 @@ int main()
 		exit(1);
 	}
 	
-	Pix *image = pixRead("/home/pi/2021-09-01-102232_1184x624_scrot.png");
+	Pix *image = pixRead("/home/pi/Desktop/SOE/Trabalho/codigo-fonte/testImage.png");
 	api->SetImage(image);
 	
 	outText = api->GetUTF8Text();
