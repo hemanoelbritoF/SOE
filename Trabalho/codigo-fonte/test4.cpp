@@ -13,7 +13,7 @@ int main()
 	wiringPiSetup();
 	system("gpio mode 0 in");
 	
-	VideoCapture cap("http://192.168.0.35:8080/video");
+	
 	char *outText;
 	tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
 	if(api->Init(NULL,"eng"))
@@ -31,11 +31,18 @@ int main()
 			break;
 		
 	}
+	
+	VideoCapture cap("http://192.168.0.35:8080/video");
 	Mat frame;
 	cap >> frame;
-
+	api->SetImage(frame.data, frame.cols, frame.rows, 3, frame.step);
 	imshow("Frame",frame);
+	cap.release();
+	outText = api->GetUTF8Text();
+	printf("O resultado é:%s\n",outText);
 	char c = (char)waitKey(0);
 	api->End();
+	delete api;
+	delete [] outText;
 	return 0;
 }
