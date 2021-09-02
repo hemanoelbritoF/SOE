@@ -38,9 +38,10 @@ int main()
 	api->SetImage(frame.data, frame.cols, frame.rows, 3, frame.step);
 	imshow("Frame",frame);
 	cap.release();
+	
+	char c = (char)waitKey(0);
 	outText = api->GetUTF8Text();
 	printf("O resultado é:%s\n",outText);
-	char c = (char)waitKey(0);
 	api->End();
 	delete api;
 	delete [] outText;
