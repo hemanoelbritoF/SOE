@@ -35,7 +35,13 @@ int main()
 	VideoCapture cap("http://192.168.0.35:8080/video");
 	Mat frame;
 	cap >> frame;
+	//api->SetImage(frame.data, frame.cols, frame.rows, 3, frame.step);
+	int imheight = frame.rows;
+	int imwidth = frame.cols;
+	
+	frame = frame(Range(imheight/1.5 + 90,imheight-140),Range(0,imwidth));
 	api->SetImage(frame.data, frame.cols, frame.rows, 3, frame.step);
+	
 	imshow("Frame",frame);
 	cap.release();
 	
