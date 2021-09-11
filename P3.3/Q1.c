@@ -43,7 +43,7 @@ int main()
       printf("Erro");
       return 1;
   }
-  pfd.fd = open("/sys/class/gpio/gpio17/value", O_RDONLY);
+  pfd.fd = popen("/sys/class/gpio/gpio17/value", O_RDONLY);
   read(pfd.fd, &iobuff, 1);
   pfd.events = POLLPRI | POLLERR;
 
@@ -60,11 +60,10 @@ int main()
   pinMode(pin, OUTPUT);
 
   
-  int val = 0; //valor lido no pin2
-  int aux = 0;
+ 
 
-  val = ;
-  aux = val;
+
+
   pipe(fd);
   FD_SET(fd[0], &set); /* add our file descriptor to the set */
   pid_filho = fork();
@@ -75,7 +74,7 @@ int main()
     while(1)
        {
 	       
-        rv = select(filedesc + 1, &set, NULL, NULL, &timeout);
+        rv = select(fd[0] + 1, &set, NULL, NULL, &timeout);
         if (rv == -1)
             perror("select"); /* an error accured */
         else if (rv == 0)
