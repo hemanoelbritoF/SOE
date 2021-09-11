@@ -10,6 +10,9 @@
 #include <signal.h>
 #include <sys/poll.h>
 #include <sys/select.h>
+#include <fcntl.h>    /* For O_RDWR */
+
+
 
 int teste()
 {
