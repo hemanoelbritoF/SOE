@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <sys/poll.h>
+#include <sys/select.h>
 
 int teste()
 {
@@ -30,7 +31,7 @@ int main()
   int buffer;
   
 
-  #Poll
+  //Poll
   struct pollfd pfd;
   char iobuff;
   system("echo 17       > /sys/class/gpio/export");
@@ -46,6 +47,15 @@ int main()
   read(pfd.fd, &iobuff, 1);
   pfd.events = POLLPRI | POLLERR;
 
+  //select
+  fd_set set;
+  struct timeval timeout;
+  int rv;
+  FD_ZERO(&set); /* clear the set */
+  timeout.tv_sec = 0;
+  timeout.tv_usec = 10;
+
+
   wiringPiSetup();
   pinMode(pin, OUTPUT);
 
@@ -56,6 +66,7 @@ int main()
   val = ;
   aux = val;
   pipe(fd);
+  FD_SET(fd[0], &set); /* add our file descriptor to the set */
   pid_filho = fork();
 
   if(pid_filho==0)
@@ -64,25 +75,29 @@ int main()
     while(1)
        {
 	       
-         val = val_read(fd);
-	       if(read(fd[0],&buffer,sizeof(int))>0)
-              {
-                 printf("valor no buffer read: %d\n", val);
-                 freq = val;
-               }
-               if(iter%2 == 0)
-               {
-                       digitalWrite(pin, HIGH);
-                       usleep((1000000/freq)/2);
-               }
-               else
-               {
-                       digitalWrite(pin, LOW);
-                       usleep((1000000/freq)/2);
-               }
-               iter++;
+        rv = select(filedesc + 1, &set, NULL, NULL, &timeout);
+        if (rv == -1)
+            perror("select"); /* an error accured */
+        else if (rv == 0)
+            printf("timeout"); /* a timeout occured */
+        else
+            read(fd[0], &buffer, sizeof(int)); /* there was data to read */
+        freq = buffer;
+        if (iter % 2 == 0)
+        {
+            digitalWrite(pin, HIGH);
+            usleep((1000000 / freq) / 2);
+        }
+        else
+        {
+            digitalWrite(pin, LOW);
+            usleep((1000000 / freq) / 2);
+        }
+        iter++;
+	       
                
        }
+    close(fd[0]);
   }
   else
   {
@@ -103,7 +118,7 @@ int main()
     }
   }
   close(pfd.fd);
-  system("echo 4 > /sys/class/gpio/unexport");
+  system("echo 17 > /sys/class/gpio/unexport");
   return 0;
 }
 
