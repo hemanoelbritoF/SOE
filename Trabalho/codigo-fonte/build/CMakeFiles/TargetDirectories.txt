@@ -1,0 +1,3 @@
+/home/pi/Desktop/SOE/Trabalho/codigo-fonte/build/CMakeFiles/rebuild_cache.dir
+/home/pi/Desktop/SOE/Trabalho/codigo-fonte/build/CMakeFiles/picameracv.dir
+/home/pi/Desktop/SOE/Trabalho/codigo-fonte/build/CMakeFiles/edit_cache.dir

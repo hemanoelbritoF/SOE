@@ -14,6 +14,7 @@ int main()
 	//VideoCapture cap("http://video");
 	Mat frame;
 	raspicam::RaspiCam_Cv cap;
+	cap.set( cv::CAP_PROP_FORMAT, CV_8UC1 );
 	char* outText;
 	tesseract::TessBaseAPI* api = new tesseract::TessBaseAPI();
 	

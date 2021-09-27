@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/picameracv.dir/picameracv.cpp.o -o picameracv   -L/usr/local/lib  -Wl,-rpath,/usr/local/lib:/opt/opencv-4.1.0/lib -lraspicam /opt/opencv-4.1.0/lib/libopencv_core.so.4.1.0 -lraspicam_cv 
