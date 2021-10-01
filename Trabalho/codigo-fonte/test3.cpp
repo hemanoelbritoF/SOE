@@ -11,9 +11,21 @@ using namespace cv;
 int main()
 {
 	int i =0;
-	VideoCapture cap("http://192.168.0.35:8080/video");
+	VideoCapture cap(0);
+	cap.set(CAP_PROP_FRAME_HEIGHT, 1944);
+    cap.set(CAP_PROP_FRAME_WIDTH, 2592);
+	Mat frame;
+	Mat resized_frame;
+	Mat grayscale;
+	Mat grayscalecp;
+	
 	char *outText;
 	tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
+	
+	int x=1070;
+	int y=1000;
+	Rect text_rect(x,y,200,20);
+	
 	if(api->Init(NULL,"eng"))
 	{
 		fprintf(stderr, "error\n");
@@ -28,24 +40,85 @@ int main()
 	
 	while(1)
 	{
-		Mat frame;
+		
 		cap >> frame;
 		if(frame.empty())
 			break;
 		
-		api->SetImage(frame.data, frame.cols, frame.rows, 3, frame.step);
-		outText = api->GetUTF8Text();
-		//if(i%2==0)
-		//	imshow("Frame",frame);
+		Rect text_rect(x,y,600,60);
+		rectangle(frame,text_rect,Scalar(255,0,0),6,8,0);
+		resize(frame, resized_frame, Size(800, 450), INTER_LINEAR);
+		//printf("%d,%d\n",x,y);
 		
-		char c = (char)waitKey(33);
-		if(c==27)
+		//if(i%2==0)
+		imshow("Frame",resized_frame);
+		
+		char c = (char)waitKey(0);
+		if(c==27)//esc
 			break;
+		
+		if(c==105||c==107)//i || k
+		{
+				if(c==107)//i
+				{
+					y+=10;
+				}
+				else//k
+				{
+					y-=10;
+					if(y<0)
+						y=0;
+				}
+				
+				
+		}	
+		
+		if(c==106||c==108)//j || l
+		{
+				if(c==106)//j
+				{
+					x-=10;
+					if(x<0)
+						x=0;
+				}
+				else//l
+				{
+					x+=10;
+					
+				}
 			
-		printf("%s\n",outText);
+				
+		}
+		
 		i++;
 	}
+	cap.release();
+	system("raspistill -o image.jpg");
+	frame = imread("image.jpg");
+	Rect cut(x,y,600,60);
+	cvtColor(frame(cut),grayscale,COLOR_RGB2GRAY);
 	
+	imshow("Frame",grayscale);
+	waitKey(0);
+	int val=80;
+	
+	while(1)
+	{
+	
+	imshow("Frame",grayscale);
+	char c = (char)waitKey(0);
+	printf("%d,%d\n",x,y);
+	if(c==27)//esc
+		break;
+	
+    }
+    grayscalecp = grayscale;
+    //threshold(grayscale ,grayscale ,0,200, THRESH_BINARY+THRESH_OTSU );
+    imshow("Frame",grayscale);
+    waitKey(0);
+	api->SetImage(grayscale.data, grayscale.cols, grayscale.rows, 3, grayscale.step);
+	outText = api->GetUTF8Text();
+	printf("%s\n",outText);
 	
 	api->End();
 	delete api;

@@ -3,7 +3,9 @@
 #include "opencv2/opencv.hpp"
 #include <iostream>
 #include <string>
+#include <unistd.h>
 #include <raspicam/raspicam_cv.h>
+
 
 using namespace std;
 using namespace cv;
@@ -11,10 +13,19 @@ using namespace cv;
 int main()
 {
 	int i = 0;
-	//VideoCapture cap("http://video");
+	VideoCapture cap(0);
 	Mat frame;
-	raspicam::RaspiCam_Cv cap;
-	cap.set( cv::CAP_PROP_FORMAT, CV_8UC1 );
+	//raspicam::RaspiCam_Cv cap;
+	//cap.set( CAP_PROP_FORMAT, CV_8UC3 );
+	//cap.set( CAP_PROP_FRAME_WIDTH, 1920 );
+	//cap.set( CAP_PROP_FRAME_HEIGHT, 1080 );
+	//cap.set( CAP_PROP_FPS, 30 );
+	//sleep(5);
+	if (!cap.isOpened())
+	{
+		cout << "error2\n";
+		return 0;
+	}
 	char* outText;
 	tesseract::TessBaseAPI* api = new tesseract::TessBaseAPI();
 	
@@ -24,11 +35,7 @@ int main()
 		exit(1);
 	}
 	api->SetPageSegMode(tesseract::PSM_AUTO);
-	if (!cap.isOpened())
-	{
-		cout << "error2\n";
-		return 0;
-	}
+	
 
 	while (1)
 	{
