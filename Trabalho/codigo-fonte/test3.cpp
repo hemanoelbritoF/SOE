@@ -22,8 +22,8 @@ int main()
 	char *outText;
 	tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
 	
-	int x=1070;
-	int y=1000;
+	int x=1000;
+	int y=820;
 	Rect text_rect(x,y,200,20);
 	
 	if(api->Init(NULL,"eng"))
@@ -93,7 +93,7 @@ int main()
 		i++;
 	}
 	cap.release();
-	system("raspistill -o image.jpg");
+	system("raspistill -o image.jpg -br 50 -sh 100 -sa -100 -ex auto");
 	frame = imread("image.jpg");
 	Rect cut(x,y,600,60);
 	cvtColor(frame(cut),grayscale,COLOR_RGB2GRAY);
@@ -113,7 +113,7 @@ int main()
 	
     }
     grayscalecp = grayscale;
-    //threshold(grayscale ,grayscale ,0,200, THRESH_BINARY+THRESH_OTSU );
+    //threshold(grayscale ,grayscale ,127,255, THRESH_BINARY+THRESH_OTSU );
     imshow("Frame",grayscale);
     waitKey(0);
 	api->SetImage(grayscale.data, grayscale.cols, grayscale.rows, 3, grayscale.step);
