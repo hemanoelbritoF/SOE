@@ -189,13 +189,14 @@ void on_row(GtkButton *b)
 
 void delete_rows()
 {
-
-	if(row == 0)
-		return;
-	for (int i=0;i<100;i++)
+	GList *children, *iter;
+	children = gtk_container_get_children(GTK_CONTAINER(dc_grid));
+	for (iter = children; iter!=NULL; iter = g_list_next(iter))
 	{
-		gtk_grid_remove_row(GTK_GRID(dc_grid),i);
+		gtk_widget_destroy(GTK_WIDGET(iter->data));
+
 	}
+	g_list_free(children);
 }
 
 
