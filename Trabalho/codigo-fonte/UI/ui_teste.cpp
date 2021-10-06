@@ -185,6 +185,44 @@ void on_exit_btn_clicked (GtkButton *b)
 void on_row(GtkButton *b)
 {
 	printf("%s\n",gtk_button_get_label(b));
+	
+	//reset grid
+	delete_rows();
+	
+	//make file string
+	char txt[] = ".txt";
+	char file_name[1024];
+	sprintf(file_name, "%s", gtk_button_get_label(b));  
+	strcat(file_name,txt);
+	
+	FILE *f1 = fopen(file_name, "r");
+	if(f1==NULL)
+	{
+		printf("File error!\n");
+		return;
+	}
+	
+	//make buttons and append to grid
+	row=0;
+	while(1)
+	{
+		if(fgets(tmp,1024,f1)==NULL)
+		{
+			fclose(f1);
+			break;
+		}
+		tmp[strlen(tmp)-1] = 0;
+		
+		gtk_grid_insert_row(GTK_GRID(dc_grid), row);
+		
+		label[row] = gtk_label_new (tmp);
+		gtk_label_set_justify (GTK_LABEL(label[row]), GTK_JUSTIFY_LEFT);
+		gtk_label_set_xalign (GTK_LABEL(label[row]), 0.0);
+		gtk_grid_attach (GTK_GRID(dc_grid), label[row], 1, row, 1, 1);
+		gtk_widget_show(label[row]);
+		
+		row++;
+	}
 }
 
 void delete_rows()
