@@ -4,3 +4,8 @@ b
 fg
 s
 gf
+abacate.txt
+banana.txt
+Deck3
+Deck4
+Deck5

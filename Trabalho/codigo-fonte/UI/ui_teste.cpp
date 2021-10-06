@@ -9,6 +9,9 @@
 #include <time.h>
 #include <ctype.h>
 #include <sys/mman.h>
+#include <dirent.h> 
+#include <stdio.h> 
+
 
 //window
 GtkWidget  *window;
@@ -20,6 +23,7 @@ GtkWidget  *sec_btns;
 GtkWidget  *dc_win;
 GtkWidget  *dc_viewp;
 GtkWidget  *dc_grid;
+GtkWidget  *text_entry;
 
 
 //buttons
@@ -28,7 +32,11 @@ GtkWidget  *m_cards;
 GtkWidget  *add_btn;
 GtkWidget  *rem_btn;
 GtkWidget  *exit_btn;
+GtkWidget  *back_btn;
+GtkWidget  *enter_btn;
 
+//text entry
+GtkWidget  *get_usr_entry;
 
 //rows of cards and decks
 GtkWidget *label[1000];
@@ -38,18 +46,21 @@ GtkWidget *button[1000];
 //builder
 GtkBuilder *builder;
 
-
+//aux
 char tmp[1024];
 int row = 0;
+int cd_flag = 0;
 
 void on_m_decks_clicked(GtkButton *);
 void on_m_cards_clicked(GtkButton *);
 void on_add_btn_clicked(GtkButton *);
 void on_rem_btn_clicked(GtkButton *);
 void on_exit_btn_clicked (GtkButton *);
+void on_back_btn_clicked (GtkButton *);
+void on_enter_btn_clicked (GtkButton *);
 void on_row(GtkButton *);
 void delete_rows();
-
+void update_list();
 
 
 
@@ -60,9 +71,12 @@ int main(int argc, char *argv[])
 	
 	
 	builder = gtk_builder_new_from_file("Ui_teste.glade");
-	
+	//load windows
 	window = GTK_WIDGET(gtk_builder_get_object(builder,"gtk_window"));
+	text_entry = GTK_WIDGET(gtk_builder_get_object(builder,"text_entry"));
+	
 	g_signal_connect(window,"destroy", G_CALLBACK(gtk_main_quit),NULL);
+	
 	
 	gtk_builder_connect_signals(builder,NULL);
 	
@@ -71,7 +85,11 @@ int main(int argc, char *argv[])
 	m_cards = GTK_WIDGET(gtk_builder_get_object(builder,"m_cards"));
 	add_btn = GTK_WIDGET(gtk_builder_get_object(builder,"add_btn"));
 	rem_btn = GTK_WIDGET(gtk_builder_get_object(builder,"rem_btn"));
-	exit_btn = GTK_WIDGET(gtk_builder_get_object(builder,"exit_btn"));
+	back_btn = GTK_WIDGET(gtk_builder_get_object(builder,"back_btn"));
+	enter_btn = GTK_WIDGET(gtk_builder_get_object(builder,"enter_btn"));
+	
+	//usr entry
+	get_usr_entry = GTK_WIDGET(gtk_builder_get_object(builder,"get_usr_entry"));
 	
 	//load list
 	dc_win = GTK_WIDGET(gtk_builder_get_object(builder,"dc_win"));
@@ -85,12 +103,15 @@ int main(int argc, char *argv[])
 	g_signal_connect(add_btn,"clicked",G_CALLBACK(on_add_btn_clicked),NULL);
 	g_signal_connect(rem_btn,"clicked",G_CALLBACK(on_rem_btn_clicked),NULL);
 	g_signal_connect(exit_btn,"clicked",G_CALLBACK(on_exit_btn_clicked),NULL);
+	g_signal_connect(back_btn,"clicked",G_CALLBACK(on_back_btn_clicked),NULL);
+	g_signal_connect(enter_btn,"clicked",G_CALLBACK(on_enter_btn_clicked),NULL);
 	
 	//load deck file
 	
 	
 	
 	gtk_widget_show(window);
+	gtk_widget_hide(text_entry);
 	
 	gtk_main();
 	
@@ -100,77 +121,25 @@ int main(int argc, char *argv[])
 
 void on_m_decks_clicked(GtkButton *b)
 {
-	delete_rows();
-	FILE *f1 = fopen("Decks.txt", "r");
-	if(f1==NULL)
-	{
-		printf("File error!\n");
-		exit(1);
-	}
+	cd_flag = 1;
 	
-	//make buttons and append to grid
-	row=0;
-	while(1)
-	{
-		if(fgets(tmp,1024,f1)==NULL)
-		{
-			fclose(f1);
-			break;
-		}
-		tmp[strlen(tmp)-1] = 0;
-		
-		gtk_grid_insert_row(GTK_GRID(dc_grid), row);
-
-		//add buttons
-		button[row] = gtk_button_new_with_label(tmp);
-		gtk_button_set_alignment(GTK_BUTTON(button[row]),0.0,0.5);
-		gtk_grid_attach(GTK_GRID(dc_grid), button[row], 1, row, 1, 1);
-		g_signal_connect(button[row], "clicked", G_CALLBACK(on_row),NULL);
-		gtk_widget_show(button[row]);
-		row++;
-		
-		
-	}
+	update_list();
 	
 }
 
 void on_m_cards_clicked(GtkButton *b)
 {
-	delete_rows();
-	FILE *f1 = fopen("AllCards.txt", "r");
-	if(f1==NULL)
-	{
-		printf("File error!\n");
-		exit(1);
-	}
+	cd_flag = 2;
 	
-	//make buttons and append to grid
-	row=0;
-	while(1)
-	{
-		if(fgets(tmp,1024,f1)==NULL)
-		{
-			fclose(f1);
-			break;
-		}
-		tmp[strlen(tmp)-1] = 0;
-		
-		gtk_grid_insert_row(GTK_GRID(dc_grid), row);
-		
-		label[row] = gtk_label_new (tmp);
-		gtk_label_set_justify (GTK_LABEL(label[row]), GTK_JUSTIFY_LEFT);
-		gtk_label_set_xalign (GTK_LABEL(label[row]), 0.0);
-		gtk_grid_attach (GTK_GRID(dc_grid), label[row], 1, row, 1, 1);
-		gtk_widget_show(label[row]);
-		
-		row++;
-		
-		
-	}
-	printf("m_cards\n");
+	update_list();
+	
 }
 void on_add_btn_clicked(GtkButton *b)
 {
+	if(cd_flag == 1)
+	{
+		gtk_widget_show_all(text_entry);
+	}
 	printf("add_btn\n");
 }
 void on_rem_btn_clicked(GtkButton *b)
@@ -225,6 +194,58 @@ void on_row(GtkButton *b)
 	}
 }
 
+void on_back_btn_clicked (GtkButton *b)
+{
+	gtk_editable_delete_text(GTK_EDITABLE(get_usr_entry),0,-1);
+	gtk_widget_hide(text_entry);
+}
+
+void on_enter_btn_clicked (GtkButton *b)
+{
+	if(cd_flag == 1)
+	{
+		
+		printf("%s\n",gtk_entry_get_text(GTK_ENTRY(get_usr_entry)));
+		char txt[] = ".txt";
+		char file_name[1024], file_namecp[1024];
+		
+		sprintf(file_name, "%s", gtk_entry_get_text(GTK_ENTRY(get_usr_entry)));  
+		strcpy(file_namecp,file_name);
+		strcat(file_name,txt);
+		
+		FILE *f1 = fopen(file_name, "r");
+		if(f1==NULL)
+		{
+				
+			char start_cmd[2048] = "echo ";
+			char start_cmd2[2048] = "echo ";
+			char end_cmd[] = " >> Decks.txt";
+			char end_cmd2[] = " >";
+			
+			strcat(start_cmd,file_namecp);
+			strcat(start_cmd,end_cmd);
+			system(start_cmd);
+			
+			strcat(start_cmd2,end_cmd2);
+			strcat(start_cmd2,file_name);
+			system(start_cmd2);
+			printf("File error!\n");
+			update_list();
+			
+			gtk_editable_delete_text(GTK_EDITABLE(get_usr_entry),0,-1);
+			gtk_widget_hide(text_entry);
+			return;
+		}
+	
+		
+		update_list();
+		
+		gtk_editable_delete_text(GTK_EDITABLE(get_usr_entry),0,-1);
+		gtk_widget_hide(text_entry);
+	}
+	
+}
+
 void delete_rows()
 {
 	GList *children, *iter;
@@ -237,4 +258,80 @@ void delete_rows()
 	g_list_free(children);
 }
 
+void update_list()
+{
+	delete_rows();
+	if(cd_flag == 1)
+	{
+	delete_rows();
+	FILE *f1 = fopen("Decks.txt", "r");
+	if(f1==NULL)
+	{
+		printf("File error!\n");
+		exit(1);
+	}
+	
+	//make buttons and append to grid
+	row=0;
+	while(1)
+	{
+		if(fgets(tmp,1024,f1)==NULL)
+		{
+			fclose(f1);
+			break;
+		}
+		tmp[strlen(tmp)-1] = 0;
+		
+		gtk_grid_insert_row(GTK_GRID(dc_grid), row);
+
+		//add buttons
+		button[row] = gtk_button_new_with_label(tmp);
+		gtk_button_set_alignment(GTK_BUTTON(button[row]),0.0,0.5);
+		gtk_grid_attach(GTK_GRID(dc_grid), button[row], 1, row, 1, 1);
+		g_signal_connect(button[row], "clicked", G_CALLBACK(on_row),NULL);
+		gtk_widget_show(button[row]);
+		row++;
+		
+		
+	}
+	}
+	
+	if(cd_flag == 2)
+	{
+		
+
+	delete_rows();
+	FILE *f1 = fopen("AllCards.txt", "r");
+	if(f1==NULL)
+	{
+		printf("File error!\n");
+		exit(1);
+	}
+	
+	//make buttons and append to grid
+	row=0;
+	while(1)
+	{
+		if(fgets(tmp,1024,f1)==NULL)
+		{
+			fclose(f1);
+			break;
+		}
+		tmp[strlen(tmp)-1] = 0;
+		
+		gtk_grid_insert_row(GTK_GRID(dc_grid), row);
+		
+		label[row] = gtk_label_new (tmp);
+		gtk_label_set_justify (GTK_LABEL(label[row]), GTK_JUSTIFY_LEFT);
+		gtk_label_set_xalign (GTK_LABEL(label[row]), 0.0);
+		gtk_grid_attach (GTK_GRID(dc_grid), label[row], 1, row, 1, 1);
+		gtk_widget_show(label[row]);
+		
+		row++;
+		
+		
+	}
+	}
+	
+}
 
