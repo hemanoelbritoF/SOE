@@ -50,6 +50,7 @@ GtkBuilder *builder;
 char tmp[1024];
 int row = 0;
 int cd_flag = 0;
+int rem_flag = 0;
 
 void on_m_decks_clicked(GtkButton *);
 void on_m_cards_clicked(GtkButton *);
@@ -144,7 +145,16 @@ void on_add_btn_clicked(GtkButton *b)
 }
 void on_rem_btn_clicked(GtkButton *b)
 {
-	printf("rem_btn\n");
+	if(rem_flag == 1)
+	{
+		rem_flag=0;
+	}
+	
+	if(rem_flag == 0)
+	{
+		rem_flag=1;
+	}
+	
 }
 void on_exit_btn_clicked (GtkButton *b)
 {
@@ -153,44 +163,105 @@ void on_exit_btn_clicked (GtkButton *b)
 
 void on_row(GtkButton *b)
 {
-	printf("%s\n",gtk_button_get_label(b));
-	
-	//reset grid
-	delete_rows();
-	
 	//make file string
 	char txt[] = ".txt";
 	char file_name[1024];
 	sprintf(file_name, "%s", gtk_button_get_label(b));  
 	strcat(file_name,txt);
 	
-	FILE *f1 = fopen(file_name, "r");
-	if(f1==NULL)
+	if(rem_flag==1)
 	{
-		printf("File error!\n");
+		int n = 0;
+		while(1)
+		{
+			GtkWidget* temp = gtk_grid_get_child_at(GTK_GRID(dc_grid),1, n);
+			if(GTK_BUTTON(temp) == b)
+				break;
+			n++;
+			
+		}
+		printf("%d\n",n);
+		
+		system("cp Decks.txt aux.txt");
+		
+		FILE *f1 = fopen("aux.txt", "r");
+		if(f1==NULL)
+		{
+			printf("File error!\n");
+			return;
+		}
+		
+		system("rm Decks.txt");
+		system("touch Decks.txt");
+		row=0;
+		while(1)
+		{
+			if(fgets(tmp,1024,f1)==NULL)
+			{
+				fclose(f1);
+				break;
+			}
+			if(!row == n)
+			{
+				
+				tmp[strlen(tmp)-1] = 0;
+				char cmd_append[2048] = "echo ";
+				strcat(cmd_append,tmp);
+				printf("%s\n",cmd_append);
+				
+				system(cmd_append);
+				strcat(cmd_append,">>Decks.txt");
+				printf("%s\n",cmd_append);
+				system(cmd_append);
+			}
+			row++;
+		}
+		
+		
+		char remove_file[1024] = "rm ";
+		strcat(remove_file,file_name);
+		system(remove_file);
+		
+		update_list();
 		return;
 	}
-	
-	//make buttons and append to grid
-	row=0;
-	while(1)
+	else
 	{
-		if(fgets(tmp,1024,f1)==NULL)
+	
+	
+		//reset grid
+		delete_rows();
+		
+		
+		
+		FILE *f1 = fopen(file_name, "r");
+		if(f1==NULL)
 		{
-			fclose(f1);
-			break;
+			printf("File error!\n");
+			return;
 		}
-		tmp[strlen(tmp)-1] = 0;
 		
-		gtk_grid_insert_row(GTK_GRID(dc_grid), row);
-		
-		label[row] = gtk_label_new (tmp);
-		gtk_label_set_justify (GTK_LABEL(label[row]), GTK_JUSTIFY_LEFT);
-		gtk_label_set_xalign (GTK_LABEL(label[row]), 0.0);
-		gtk_grid_attach (GTK_GRID(dc_grid), label[row], 1, row, 1, 1);
-		gtk_widget_show(label[row]);
-		
-		row++;
+		//make buttons and append to grid
+		row=0;
+		while(1)
+		{
+			if(fgets(tmp,1024,f1)==NULL)
+			{
+				fclose(f1);
+				break;
+			}
+			tmp[strlen(tmp)-1] = 0;
+			
+			gtk_grid_insert_row(GTK_GRID(dc_grid), row);
+			
+			label[row] = gtk_label_new (tmp);
+			gtk_label_set_justify (GTK_LABEL(label[row]), GTK_JUSTIFY_LEFT);
+			gtk_label_set_xalign (GTK_LABEL(label[row]), 0.0);
+			gtk_grid_attach (GTK_GRID(dc_grid), label[row], 1, row, 1, 1);
+			gtk_widget_show(label[row]);
+			
+			row++;
+		}
 	}
 }
 
