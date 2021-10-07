@@ -46,6 +46,7 @@ GtkWidget  *get_usr_entry;
 //rows of cards and decks
 GtkWidget *label[1000];
 GtkWidget *button[1000];
+char actual_deck[1024];
 
 
 //builder
@@ -119,6 +120,8 @@ int main(int argc, char *argv[])
 	g_signal_connect(exit_btn,"clicked",G_CALLBACK(on_exit_btn_clicked),NULL);
 	g_signal_connect(back_btn,"clicked",G_CALLBACK(on_back_btn_clicked),NULL);
 	g_signal_connect(enter_btn,"clicked",G_CALLBACK(on_enter_btn_clicked),NULL);
+	g_signal_connect(back_btn2,"clicked",G_CALLBACK(on_back_btn2_clicked),NULL);
+	g_signal_connect(manual_btn,"clicked",G_CALLBACK(on_manual_btn_clicked),NULL);
 	
 	//start window
 	
@@ -155,7 +158,11 @@ void on_add_btn_clicked(GtkButton *b)
 	{
 		gtk_widget_show_all(text_entry);
 	}
-	printf("add_btn\n");
+	if(cd_flag == 2)
+	{
+		gtk_widget_show_all(method_selector);
+	}
+	
 }
 void on_rem_btn_clicked(GtkButton *b)
 {
@@ -184,64 +191,68 @@ void on_row(GtkButton *b)
 	
 	if(rem_flag==1)
 	{
-		int n = 0;
-		while(1)
+		if(cd_flag == 1)
 		{
-			GtkWidget* temp = gtk_grid_get_child_at(GTK_GRID(dc_grid),1, n);
-			if(GTK_BUTTON(temp) == b)
-				break;
-			n++;
+			int n = 0;
+			while(1)
+			{
+				GtkWidget* temp = gtk_grid_get_child_at(GTK_GRID(dc_grid),1, n);
+				if(GTK_BUTTON(temp) == b)
+					break;
+				n++;
+				
+			}
+			printf("%d\n",n);
 			
-		}
-		printf("%d\n",n);
-		
-		system("cp Decks.txt aux.txt");
-		
-		FILE *f1 = fopen("aux.txt", "r");
-		if(f1==NULL)
-		{
-			printf("File error!\n");
+			system("cp Decks.txt aux.txt");
+			
+			FILE *f1 = fopen("aux.txt", "r");
+			if(f1==NULL)
+			{
+				printf("File error!\n");
+				return;
+			}
+			
+			system("rm Decks.txt");
+			system("touch Decks.txt");
+			row=0;
+			while(1)
+			{
+				if(fgets(tmp,1024,f1)==NULL)
+				{
+					fclose(f1);
+					break;
+				}
+				if(!row == n)
+				{
+					
+					tmp[strlen(tmp)-1] = 0;
+					char cmd_append[2048] = "echo ";
+					strcat(cmd_append,tmp);
+					printf("%s\n",cmd_append);
+					
+					system(cmd_append);
+					strcat(cmd_append,">>Decks.txt");
+					printf("%s\n",cmd_append);
+					system(cmd_append);
+				}
+				row++;
+			}
+			
+			
+			char remove_file[1024] = "rm ";
+			strcat(remove_file,file_name);
+			system(remove_file);
+			
+			update_list();
 			return;
 		}
-		
-		system("rm Decks.txt");
-		system("touch Decks.txt");
-		row=0;
-		while(1)
-		{
-			if(fgets(tmp,1024,f1)==NULL)
-			{
-				fclose(f1);
-				break;
-			}
-			if(!row == n)
-			{
-				
-				tmp[strlen(tmp)-1] = 0;
-				char cmd_append[2048] = "echo ";
-				strcat(cmd_append,tmp);
-				printf("%s\n",cmd_append);
-				
-				system(cmd_append);
-				strcat(cmd_append,">>Decks.txt");
-				printf("%s\n",cmd_append);
-				system(cmd_append);
-			}
-			row++;
-		}
-		
-		
-		char remove_file[1024] = "rm ";
-		strcat(remove_file,file_name);
-		system(remove_file);
-		
-		update_list();
-		return;
 	}
 	else
 	{
-	
-	
+		
+		sprintf(actual_deck, "%s", gtk_button_get_label(b)); 
+		printf("%s\n",actual_deck);
 		//reset grid
 		delete_rows();
 		
@@ -267,14 +278,15 @@ void on_row(GtkButton *b)
 			
 			gtk_grid_insert_row(GTK_GRID(dc_grid), row);
 			
-			label[row] = gtk_label_new (tmp);
-			gtk_label_set_justify (GTK_LABEL(label[row]), GTK_JUSTIFY_LEFT);
-			gtk_label_set_xalign (GTK_LABEL(label[row]), 0.0);
-			gtk_grid_attach (GTK_GRID(dc_grid), label[row], 1, row, 1, 1);
-			gtk_widget_show(label[row]);
+			button[row] = gtk_button_new_with_label(tmp);
+			gtk_button_set_alignment(GTK_BUTTON(button[row]),0.0,0.5);
+			gtk_grid_attach(GTK_GRID(dc_grid), button[row], 1, row, 1, 1);
+			g_signal_connect(button[row], "clicked", G_CALLBACK(on_row2),NULL);
+			gtk_widget_show(button[row]);
 			
 			row++;
 		}
+		cd_flag = 2; 
 	}
 }
 
@@ -329,13 +341,51 @@ void on_enter_btn_clicked (GtkButton *b)
 			gtk_widget_hide(text_entry);
 			return;
 		}
-	
+		
 		
 		update_list();
 		
 		gtk_editable_delete_text(GTK_EDITABLE(get_usr_entry),0,-1);
 		gtk_widget_hide(text_entry);
 	}
+	
+	if(cd_flag == 2)
+	{
+			char txt[] = ".txt";
+			char card_name[1024];
+			
+			char file_name[1024], file_namecp[1024];
+			char append_cmd[1024] = "echo ";
+			char append_cmd2[1024] = "echo ";
+			char actual_deck_q[1024] = "q";
+			char actual_deck_aux[1024] = "q";
+			
+			strcpy(actual_deck_aux,actual_deck);
+			
+			
+			strcat(actual_deck, txt);
+			
+			sprintf(card_name, "%s",  gtk_entry_get_text(GTK_ENTRY(get_usr_entry)));  
+			
+			//add card to deck
+			strcat(append_cmd, card_name);
+			strcat(append_cmd, ">>");
+			strcat(append_cmd, actual_deck);
+			system(append_cmd);
+			
+			strcat(append_cmd2, "1");
+			strcat(append_cmd2, ">>");
+			strcat(actual_deck_q,actual_deck_aux);
+			strcat(actual_deck_q,txt);
+			
+			strcat(append_cmd2, actual_deck_q);
+			system(append_cmd2);
+			//make buttons and append to grid
+			gtk_editable_delete_text(GTK_EDITABLE(get_usr_entry),0,-1);
+			gtk_widget_hide(text_entry);
+			
+	}
+	
 	
 }
 
@@ -433,4 +483,17 @@ void on_row2(GtkButton *b)
 	
 }
 
+void on_camera_btn_clicked (GtkButton *b)
+{
+	
+}
+void on_manual_btn_clicked (GtkButton *b)
+{
+	gtk_widget_show(text_entry);
+	
+}
+void on_back_btn2_clicked (GtkButton *b)
+{
+	gtk_widget_hide(method_selector);
+}
 
