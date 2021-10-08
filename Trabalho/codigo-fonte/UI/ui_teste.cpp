@@ -54,6 +54,7 @@ GtkBuilder *builder;
 
 //aux
 char tmp[1024];
+char tmp2[1024];
 int row = 0;
 int cd_flag = 0;
 int rem_flag = 0;
@@ -148,7 +149,7 @@ void on_m_decks_clicked(GtkButton *b)
 void on_m_cards_clicked(GtkButton *b)
 {
 	cd_flag = 2;
-	
+	sprintf(actual_deck, "%s", "AllCards"); 
 	update_list();
 	
 }
@@ -168,10 +169,20 @@ void on_rem_btn_clicked(GtkButton *b)
 {
 	if(rem_flag == 1)
 	{
+		GdkColor color;
+
+		gdk_color_parse ("blue", &color);
+
+		gtk_widget_modify_bg ( GTK_WIDGET(b), GTK_STATE_NORMAL, &color);
 		rem_flag=0;
 	}
 	else if(rem_flag == 0)
 	{
+		GdkColor color;
+
+		gdk_color_parse ("red", &color);
+
+		gtk_widget_modify_bg ( GTK_WIDGET(b), GTK_STATE_NORMAL, &color);
 		rem_flag=1;
 	}
 	printf("%d\n",rem_flag);
@@ -202,7 +213,7 @@ void on_row(GtkButton *b)
 				n++;
 				
 			}
-			printf("%d\n",n);
+			
 			
 			system("cp Decks.txt aux.txt");
 			
@@ -223,6 +234,7 @@ void on_row(GtkButton *b)
 					fclose(f1);
 					break;
 				}
+				printf("ndos0-------=%d\n",n);
 				if(!row == n)
 				{
 					
@@ -254,38 +266,9 @@ void on_row(GtkButton *b)
 		sprintf(actual_deck, "%s", gtk_button_get_label(b)); 
 		printf("%s\n",actual_deck);
 		//reset grid
-		delete_rows();
 		
 		
-		
-		FILE *f1 = fopen(file_name, "r");
-		if(f1==NULL)
-		{
-			printf("File error!\n");
-			return;
-		}
-		
-		//make buttons and append to grid
-		row=0;
-		while(1)
-		{
-			if(fgets(tmp,1024,f1)==NULL)
-			{
-				fclose(f1);
-				break;
-			}
-			tmp[strlen(tmp)-1] = 0;
-			
-			gtk_grid_insert_row(GTK_GRID(dc_grid), row);
-			
-			button[row] = gtk_button_new_with_label(tmp);
-			gtk_button_set_alignment(GTK_BUTTON(button[row]),0.0,0.5);
-			gtk_grid_attach(GTK_GRID(dc_grid), button[row], 1, row, 1, 1);
-			g_signal_connect(button[row], "clicked", G_CALLBACK(on_row2),NULL);
-			gtk_widget_show(button[row]);
-			
-			row++;
-		}
+		update_list();
 		cd_flag = 2; 
 	}
 }
@@ -359,30 +342,35 @@ void on_enter_btn_clicked (GtkButton *b)
 			char append_cmd2[1024] = "echo ";
 			char actual_deck_q[1024] = "q";
 			char actual_deck_aux[1024] = "q";
+			char actual_deck_aux2[1024] = "q";
 			
 			strcpy(actual_deck_aux,actual_deck);
+			strcpy(actual_deck_aux2,actual_deck);
 			
 			
-			strcat(actual_deck, txt);
+			strcat(actual_deck_aux, txt);
 			
 			sprintf(card_name, "%s",  gtk_entry_get_text(GTK_ENTRY(get_usr_entry)));  
 			
 			//add card to deck
 			strcat(append_cmd, card_name);
 			strcat(append_cmd, ">>");
-			strcat(append_cmd, actual_deck);
+			strcat(append_cmd, actual_deck_aux);
 			system(append_cmd);
 			
 			strcat(append_cmd2, "1");
-			strcat(append_cmd2, ">>");
-			strcat(actual_deck_q,actual_deck_aux);
+			strcat(append_cmd2, " >> ");
+			strcat(actual_deck_q,actual_deck_aux2);
 			strcat(actual_deck_q,txt);
 			
 			strcat(append_cmd2, actual_deck_q);
+			printf("%s\n",append_cmd2);
 			system(append_cmd2);
+			
 			//make buttons and append to grid
 			gtk_editable_delete_text(GTK_EDITABLE(get_usr_entry),0,-1);
 			gtk_widget_hide(text_entry);
+			update_list();
 			
 	}
 	
@@ -406,6 +394,8 @@ void update_list()
 	delete_rows();
 	if(cd_flag == 1)
 	{
+		
+		
 		delete_rows();
 		FILE *f1 = fopen("Decks.txt", "r");
 		if(f1==NULL)
@@ -441,11 +431,18 @@ void update_list()
 	
 	if(cd_flag == 2)
 	{
+		char txt[] = ".txt";
+		char actual_deck_aux[1024] = "q";
+		char actual_deck_aux2[1024] = "q";
+		strcpy(actual_deck_aux,actual_deck);
+		strcat(actual_deck_aux,txt);
 		
-
 		delete_rows();
-		FILE *f1 = fopen("AllCards.txt", "r");
-		if(f1==NULL)
+		printf("%s\n",actual_deck_aux);
+		FILE *f1 = fopen(actual_deck_aux, "r");
+		strcat(actual_deck_aux2,actual_deck_aux);
+		FILE *f2 = fopen(actual_deck_aux2, "r");
+		if(f1==NULL||f2==NULL)
 		{
 			printf("File error!\n");
 			exit(1);
@@ -455,16 +452,20 @@ void update_list()
 		row=0;
 		while(1)
 		{
-			if(fgets(tmp,1024,f1)==NULL)
+			if(fgets(tmp,1024,f1)==NULL||fgets(tmp2,1024,f2)==NULL)
 			{
 				fclose(f1);
+				fclose(f2);
 				break;
 			}
 			tmp[strlen(tmp)-1] = 0;
+			tmp2[strlen(tmp2)-1] = 0;
 			
 			gtk_grid_insert_row(GTK_GRID(dc_grid), row);
-			
-			button[row] = gtk_button_new_with_label(tmp);
+			strcat(tmp2,"x");
+			strcat(tmp2,tmp);
+			printf("%s\n",tmp2);
+			button[row] = gtk_button_new_with_label(tmp2);
 			gtk_button_set_alignment(GTK_BUTTON(button[row]),0.0,0.5);
 			gtk_grid_attach(GTK_GRID(dc_grid), button[row], 1, row, 1, 1);
 			g_signal_connect(button[row], "clicked", G_CALLBACK(on_row2),NULL);
@@ -479,7 +480,213 @@ void update_list()
 
 void on_row2(GtkButton *b)
 {
-	printf("card\n");
+	if(rem_flag==1)
+	{
+		char buff[100];
+			int val_n = 0;
+			while(1)
+			{
+				
+				GtkWidget* temp = gtk_grid_get_child_at(GTK_GRID(dc_grid),1,val_n);
+				if(GTK_BUTTON(temp) == b)
+					break;
+				
+				val_n++;
+				
+				
+			}
+			sprintf(buff,"%d",val_n);
+			printf("%d\n",atoi(buff));
+			
+			
+			
+			char cmd_append[] = "cp ";
+			strcat(cmd_append,"q");
+			strcat(cmd_append,actual_deck);
+			strcat(cmd_append,".txt ");
+			strcat(cmd_append,"aux.txt");
+			system(cmd_append);
+			
+			FILE *f1 = fopen("aux.txt", "r");
+			if(f1==NULL)
+			{
+				printf("File error!\n");
+				return;
+			}
+			
+			
+			char cmd_append2[] = "rm ";
+			strcat(cmd_append2,"q");
+			strcat(cmd_append2,actual_deck);
+			strcat(cmd_append2,".txt");
+			system(cmd_append2);
+			
+			char cmd_append3[] = "touch ";
+			strcat(cmd_append3,"q");
+			strcat(cmd_append3,actual_deck);
+			strcat(cmd_append3,".txt");
+			system(cmd_append3);
+			
+			row=0;
+			while(1)
+			{
+				
+				if(fgets(tmp,1024,f1)==NULL)
+				{
+					fclose(f1);
+					break;
+				}
+				tmp[strlen(tmp)-1] = 0;
+				char cmd_append4[2048] = "echo ";
+				
+				if(row == atoi(buff))
+				{
+					printf("-----------chegou aqui0\n");
+					
+					
+					int val = atoi(tmp);
+					val--;
+					if(val!=0)
+					{
+					
+					
+					sprintf(tmp,"%d",val);
+					strcat(cmd_append4,tmp);
+					printf("cmd4%s\n",cmd_append4);
+					
+					strcat(cmd_append4," >> ");
+					strcat(cmd_append4,"q");
+					strcat(cmd_append4,actual_deck);
+					strcat(cmd_append4,".txt");
+					printf("%s\n",cmd_append4);
+					
+					system(cmd_append4);
+					}
+					
+					
+				}
+				else
+				{
+				
+					
+					strcat(cmd_append4,tmp);
+					printf("%s\n",cmd_append4);
+					
+					system(cmd_append4);
+					strcat(cmd_append4," >> ");
+					strcat(cmd_append4,"q");
+					strcat(cmd_append4,actual_deck);
+					strcat(cmd_append4,".txt");
+					printf("cmd4:%s\n",cmd_append4);
+					system(cmd_append4);
+				}
+				row++;
+			}
+			update_list();
+	
+	}
+	else
+	{
+			char buff[100];
+			int val_n = 0;
+			while(1)
+			{
+				
+				GtkWidget* temp = gtk_grid_get_child_at(GTK_GRID(dc_grid),1,val_n);
+				if(GTK_BUTTON(temp) == b)
+					break;
+				
+				val_n++;
+				
+				
+				
+			}
+			sprintf(buff,"%d",val_n);
+			printf("%d\n",atoi(buff));
+			
+			
+			
+			char cmd_append[] = "cp ";
+			strcat(cmd_append,"q");
+			strcat(cmd_append,actual_deck);
+			strcat(cmd_append,".txt ");
+			strcat(cmd_append,"aux.txt");
+			system(cmd_append);
+			
+			FILE *f1 = fopen("aux.txt", "r");
+			if(f1==NULL)
+			{
+				printf("File error!\n");
+				return;
+			}
+			
+			
+			char cmd_append2[] = "rm ";
+			strcat(cmd_append2,"q");
+			strcat(cmd_append2,actual_deck);
+			strcat(cmd_append2,".txt");
+			system(cmd_append2);
+			
+			char cmd_append3[] = "touch ";
+			strcat(cmd_append3,"q");
+			strcat(cmd_append3,actual_deck);
+			strcat(cmd_append3,".txt");
+			system(cmd_append3);
+			
+			row=0;
+			while(1)
+			{
+				
+				if(fgets(tmp,1024,f1)==NULL)
+				{
+					fclose(f1);
+					break;
+				}
+				tmp[strlen(tmp)-1] = 0;
+				char cmd_append4[2048] = "echo ";
+				
+				if(row == atoi(buff))
+				{
+					printf("-----------chegou aqui0\n");
+					
+					
+					int val = atoi(tmp);
+					val++;
+					
+					sprintf(tmp,"%d",val);
+					strcat(cmd_append4,tmp);
+					printf("cmd4%s\n",cmd_append4);
+					
+					strcat(cmd_append4," >> ");
+					strcat(cmd_append4,"q");
+					strcat(cmd_append4,actual_deck);
+					strcat(cmd_append4,".txt");
+					printf("%s\n",cmd_append4);
+					
+					system(cmd_append4);
+					
+					
+					
+				}
+				else
+				{
+				
+					
+					strcat(cmd_append4,tmp);
+					printf("%s\n",cmd_append4);
+					
+					system(cmd_append4);
+					strcat(cmd_append4," >> ");
+					strcat(cmd_append4,"q");
+					strcat(cmd_append4,actual_deck);
+					strcat(cmd_append4,".txt");
+					printf("cmd4:%s\n",cmd_append4);
+					system(cmd_append4);
+				}
+				row++;
+			}
+			update_list();
+	}
 	
 }
 
