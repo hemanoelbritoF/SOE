@@ -202,8 +202,7 @@ void on_row(GtkButton *b)
 	
 	if(rem_flag==1)
 	{
-		if(cd_flag == 1)
-		{
+		
 			int n = 0;
 			while(1)
 			{
@@ -215,38 +214,42 @@ void on_row(GtkButton *b)
 			}
 			
 			
-			system("cp Decks.txt aux.txt");
-			
-			FILE *f1 = fopen("aux.txt", "r");
-			if(f1==NULL)
+			system("cp Decks.txt aux2.txt");
+			char tmp3[1024];
+			FILE *f5 = fopen("aux2.txt", "r");
+			if(f5==NULL)
 			{
 				printf("File error!\n");
 				return;
 			}
-			
+			//int a;
+			//scanf("%d",&a);
 			system("rm Decks.txt");
 			system("touch Decks.txt");
 			row=0;
+			//rewind(f1);
 			while(1)
 			{
-				if(fgets(tmp,1024,f1)==NULL)
+				printf("row==%d,n==%d\n",row,n);
+				if(fgets(tmp3,1024,f5)==NULL)
 				{
-					fclose(f1);
+					fclose(f5);
+					
 					break;
 				}
-				printf("ndos0-------=%d\n",n);
+				
 				if(!row == n)
 				{
 					
-					tmp[strlen(tmp)-1] = 0;
-					char cmd_append[2048] = "echo ";
-					strcat(cmd_append,tmp);
-					printf("%s\n",cmd_append);
-					
-					system(cmd_append);
-					strcat(cmd_append,">>Decks.txt");
-					printf("%s\n",cmd_append);
-					system(cmd_append);
+					tmp3[strlen(tmp3)-1] = 0;
+					printf("tmp==%s\n",tmp3);
+					char cmd_append10[2048] = "echo ";
+					strcat(cmd_append10,tmp3);
+					printf("%s\n",cmd_append10);
+
+					strcat(cmd_append10," >> Decks.txt");
+					printf("%s\n",cmd_append10);
+					system(cmd_append10);
 				}
 				row++;
 			}
@@ -258,7 +261,7 @@ void on_row(GtkButton *b)
 			
 			update_list();
 			return;
-		}
+		
 	}
 	else
 	{
@@ -499,7 +502,7 @@ void on_row2(GtkButton *b)
 			printf("%d\n",atoi(buff));
 			
 			
-			
+			system("rm aux.txt");
 			char cmd_append[] = "cp ";
 			strcat(cmd_append,"q");
 			strcat(cmd_append,actual_deck);
@@ -508,6 +511,7 @@ void on_row2(GtkButton *b)
 			system(cmd_append);
 			
 			FILE *f1 = fopen("aux.txt", "r");
+			printf("file = %s\n",f1);
 			if(f1==NULL)
 			{
 				printf("File error!\n");
@@ -605,7 +609,7 @@ void on_row2(GtkButton *b)
 			printf("%d\n",atoi(buff));
 			
 			
-			
+			system("rm aux.txt");
 			char cmd_append[] = "cp ";
 			strcat(cmd_append,"q");
 			strcat(cmd_append,actual_deck);
