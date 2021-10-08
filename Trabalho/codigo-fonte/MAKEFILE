@@ -1,5 +1,5 @@
 LIBS = -I/usr/local/include/ 
-CFLAGS = -lraspicam -lraspicam_cv -lopencv_core -lopencv_highgui
+CFLAGS = -lraspicam -lraspicam_cv -lopencv_core -lopencv_highgui -ltesseract-ocr -ltesseract
 objects= main.o camera.o
 
 picam: $(objects) 

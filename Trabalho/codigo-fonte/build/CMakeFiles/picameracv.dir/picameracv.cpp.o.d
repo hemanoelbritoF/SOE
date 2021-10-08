@@ -365,6 +365,11 @@ CMakeFiles/picameracv.dir/picameracv.cpp.o: \
  /opt/opencv-4.1.0/include/opencv4/opencv2/videostab/deblurring.hpp \
  /opt/opencv-4.1.0/include/opencv4/opencv2/videostab/wobble_suppression.hpp \
  /opt/opencv-4.1.0/include/opencv4/opencv2/videostab/ring_buffer.hpp \
+ /usr/include/unistd.h /usr/include/arm-linux-gnueabihf/bits/posix_opt.h \
+ /usr/include/arm-linux-gnueabihf/bits/environments.h \
+ /usr/include/arm-linux-gnueabihf/bits/confname.h \
+ /usr/include/arm-linux-gnueabihf/bits/getopt_posix.h \
+ /usr/include/arm-linux-gnueabihf/bits/getopt_core.h \
  /usr/local/include/raspicam/raspicam_cv.h \
  /opt/opencv-4.1.0/include/opencv4/opencv2/core/core.hpp \
  /opt/opencv-4.1.0/include/opencv4/opencv2/highgui/highgui.hpp \
