@@ -202,7 +202,7 @@ void on_row(GtkButton *b)
 	
 	if(rem_flag==1)
 	{
-		
+			char buff[100];
 			int n = 0;
 			while(1)
 			{
@@ -212,55 +212,39 @@ void on_row(GtkButton *b)
 				n++;
 				
 			}
-			
+			n++;
+			sprintf(buff,"%d",n);
 			
 			system("cp Decks.txt aux2.txt");
-			char tmp3[1024];
-			FILE *f5 = fopen("aux2.txt", "r");
-			if(f5==NULL)
-			{
-				printf("File error!\n");
-				return;
-			}
+			char cmd_append[]="sed '";
+			strcat(cmd_append,buff);
+			strcat(cmd_append,"d' ");
+			strcat(cmd_append,"aux2.txt > Decks.txt");
+			printf("%s\n",cmd_append);
+			system(cmd_append);
+			
 			//int a;
 			//scanf("%d",&a);
-			system("rm Decks.txt");
-			system("touch Decks.txt");
-			row=0;
-			//rewind(f1);
-			while(1)
-			{
-				printf("row==%d,n==%d\n",row,n);
-				if(fgets(tmp3,1024,f5)==NULL)
-				{
-					fclose(f5);
-					
-					break;
-				}
-				
-				if(!row == n)
-				{
-					
-					tmp3[strlen(tmp3)-1] = 0;
-					printf("tmp==%s\n",tmp3);
-					char cmd_append10[2048] = "echo ";
-					strcat(cmd_append10,tmp3);
-					printf("%s\n",cmd_append10);
-
-					strcat(cmd_append10," >> Decks.txt");
-					printf("%s\n",cmd_append10);
-					system(cmd_append10);
-				}
-				row++;
-			}
 			
 			
 			char remove_file[1024] = "rm ";
+			sprintf(file_name, "%s", gtk_button_get_label(b));  
+			strcat(file_name,".txt");
 			strcat(remove_file,file_name);
+			printf("-------%s\n",file_name);
+			printf("-------%s\n",remove_file);
 			system(remove_file);
 			
+			char remove_file2[1024] = "rm q";
+			sprintf(file_name, "%s", gtk_button_get_label(b));  
+			strcat(file_name,".txt");
+			strcat(remove_file2,file_name);
+			printf("-------%s\n",file_name);
+			printf("-------%s\n",remove_file2);
+			system(remove_file2);
+			
 			update_list();
-			return;
+			
 		
 	}
 	else
@@ -399,7 +383,7 @@ void update_list()
 	{
 		
 		
-		delete_rows();
+		
 		FILE *f1 = fopen("Decks.txt", "r");
 		if(f1==NULL)
 		{
@@ -550,8 +534,7 @@ void on_row2(GtkButton *b)
 					
 					int val = atoi(tmp);
 					val--;
-					if(val!=0)
-					{
+					
 					
 					
 					sprintf(tmp,"%d",val);
@@ -562,9 +545,45 @@ void on_row2(GtkButton *b)
 					strcat(cmd_append4,"q");
 					strcat(cmd_append4,actual_deck);
 					strcat(cmd_append4,".txt");
-					printf("%s\n",cmd_append4);
+					printf("cmd4:%s\n",cmd_append4);
 					
 					system(cmd_append4);
+					
+					if(val == 0)
+					{
+						char buff2[100];
+						sprintf(buff2,"%d",atoi(buff)+1);
+						char cmd_append12[]="cp ";
+						strcat(cmd_append12,actual_deck);
+						strcat(cmd_append12,".txt");
+						strcat(cmd_append12," aux2.txt");
+						printf("cmd12:%s\n",cmd_append12);
+						system(cmd_append12);
+						
+						char cmd_append11[]="sed '";
+						strcat(cmd_append11,buff2);
+						strcat(cmd_append11,"d' ");
+						strcat(cmd_append11,"aux2.txt > ");
+						strcat(cmd_append11,actual_deck);
+						strcat(cmd_append11,".txt");
+						printf("cmd:11%s\n",cmd_append11);
+						system(cmd_append11);
+						
+						char cmd_append14[]="cp q";
+						strcat(cmd_append14,actual_deck);
+						strcat(cmd_append14,".txt");
+						strcat(cmd_append14," aux2.txt");
+						printf("cmd14:%s\n",cmd_append14);
+						system(cmd_append14);
+						
+						char cmd_append13[]="sed '";
+						strcat(cmd_append13,buff2);
+						strcat(cmd_append13,"d' ");
+						strcat(cmd_append13,"aux2.txt > q");
+						strcat(cmd_append13,actual_deck);
+						strcat(cmd_append13,".txt");
+						printf("cmd13:%s\n",cmd_append13);
+						system(cmd_append13);
 					}
 					
 					
