@@ -22,8 +22,8 @@ int main()
 	char *outText;
 	tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
 	
-	int x=1000;
-	int y=820;
+	int x=920;
+	int y=1200;
 	Rect text_rect(x,y,200,20);
 	
 	if(api->Init(NULL,"eng"))
