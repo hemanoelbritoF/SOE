@@ -1,16 +1,14 @@
+#include <stdio.h> 
 #include <stdlib.h>
-#include <sys/types.h>
-#include <signal.h>
-#include <unistd.h>
 #include <string.h>
 #include <gtk/gtk.h>
-#include <gtk/gtkx.h>
-#include <math.h>
-#include <time.h>
-#include <ctype.h>
-#include <sys/mman.h>
-#include <dirent.h> 
-#include <stdio.h> 
+//#include <gtk/gtkx.h>
+#include <tesseract/baseapi.h>
+#include <leptonica/allheaders.h>
+#include "opencv2/opencv.hpp"
+#include "opencv2/core.hpp"
+#include <pthread.h>
+
 
 
 //window
@@ -58,6 +56,7 @@ char tmp2[1024];
 int row = 0;
 int cd_flag = 0;
 int rem_flag = 0;
+int flag_card = -1;
 
 void on_m_decks_clicked(GtkButton *);
 void on_m_cards_clicked(GtkButton *);
@@ -75,6 +74,14 @@ void delete_rows();
 void update_list();
 
 
+//ocr
+using namespace std;
+using namespace cv;
+char *nome2;
+char tesse();
+int quadro();
+int cards();
+int tesste(char *name);
 
 
 int main(int argc, char *argv[])
@@ -123,6 +130,7 @@ int main(int argc, char *argv[])
 	g_signal_connect(enter_btn,"clicked",G_CALLBACK(on_enter_btn_clicked),NULL);
 	g_signal_connect(back_btn2,"clicked",G_CALLBACK(on_back_btn2_clicked),NULL);
 	g_signal_connect(manual_btn,"clicked",G_CALLBACK(on_manual_btn_clicked),NULL);
+	g_signal_connect(camera_btn,"clicked",G_CALLBACK(on_camera_btn_clicked),NULL);
 	
 	//start window
 	
@@ -338,7 +346,10 @@ void on_enter_btn_clicked (GtkButton *b)
 			strcat(actual_deck_aux, txt);
 			
 			sprintf(card_name, "%s",  gtk_entry_get_text(GTK_ENTRY(get_usr_entry)));  
-			
+			int flag_card=tesste(card_name);
+			if(flag_card < 0){
+				return;
+			}
 			//add card to deck
 			strcat(append_cmd, card_name);
 			strcat(append_cmd, ">>");
@@ -715,6 +726,45 @@ void on_row2(GtkButton *b)
 
 void on_camera_btn_clicked (GtkButton *b)
 {
+	flag_card = cards();
+	if(flag_card < 0){
+		printf("entrou na função\n");
+			return;
+			}
+			
+			char txt[] = ".txt";
+			char card_name[1024];
+			
+			char file_name[1024], file_namecp[1024];
+			char append_cmd[1024] = "echo ";
+			char append_cmd2[1024] = "echo ";
+			char actual_deck_q[1024] = "q";
+			char actual_deck_aux[1024] = "q";
+			char actual_deck_aux2[1024] = "q";
+			
+			strcpy(actual_deck_aux,actual_deck);
+			strcpy(actual_deck_aux2,actual_deck);
+			
+			
+			strcat(actual_deck_aux, txt);
+			
+ 
+			
+			//add card to deck
+			strcat(append_cmd, nome2);
+			strcat(append_cmd, ">>");
+			strcat(append_cmd, actual_deck_aux);
+			system(append_cmd);
+			
+			strcat(append_cmd2, "1");
+			strcat(append_cmd2, " >> ");
+			strcat(actual_deck_q,actual_deck_aux2);
+			strcat(actual_deck_q,txt);
+			
+			strcat(append_cmd2, actual_deck_q);
+			printf("%s\n",append_cmd2);
+			system(append_cmd2);
+			update_list();
 	
 }
 void on_manual_btn_clicked (GtkButton *b)
@@ -727,3 +777,136 @@ void on_back_btn2_clicked (GtkButton *b)
 	gtk_widget_hide(method_selector);
 }
 
+
+int cards() {
+	FILE *N_1 = NULL;
+  N_1 = fopen("a.json","r");
+            if(N_1 == NULL){
+                printf("Erro 2: Arquivo de Referência não pode ser aberto\n");
+            }
+    char NomeArq[300] = "";
+    printf("Digite o nome do arquivo:");
+    //scanf("%s",NomeArq);
+    quadro();
+    tesse();
+
+char* buffer1 =0;
+long length1;
+if(N_1)
+{
+    fseek(N_1,0,SEEK_END);
+    length1 = ftell(N_1);
+    fseek(N_1,0,SEEK_SET);
+    buffer1 = (char*)malloc(length1);
+    if(buffer1)
+    {
+        fread(buffer1,1,length1,N_1);
+    }
+	nome2[strlen(nome2)-1]=0;
+
+   if (strstr(buffer1,nome2)!=NULL){
+            printf("Carta localizada!\n");
+			return 1;
+        }
+    
+}  
+ fclose(N_1);
+
+return -1;
+}
+char tesse()
+{
+
+  char *outText;
+  tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
+  // Initialize tesseract-ocr with English, without specifying tessdata path
+  if (api->Init(NULL, "eng")) {
+      fprintf(stderr, "Could not initialize tesseract.\n");
+      exit(1);
+  }
+  Pix *image = pixRead("sample.png");
+  api->SetImage(image);
+  Boxa* boxes = api->GetComponentImages(tesseract::RIL_TEXTLINE, true, NULL, NULL);
+  printf("Found %d textline image components.\n", boxes->n);
+  char* ocrResult;
+  for (int i = 0; i < boxes->n; i++) {
+    BOX* box = boxaGetBox(boxes, i, L_CLONE);
+    api->SetRectangle(box->x, box->y, box->w, box->h);
+    ocrResult = api->GetUTF8Text();
+    int conf = api->MeanTextConf();
+    fprintf(stdout, "Box[%d]: x=%d, y=%d, w=%d, h=%d, confidence: %d, text: %s",
+                    i, box->x, box->y, box->w, box->h, conf, ocrResult);
+    boxDestroy(&box);
+  }
+  printf("OCR->%s", ocrResult);
+  // Destroy used object and release memory
+  api->End();
+  delete api;
+  delete [] outText;
+  pixDestroy(&image);
+    nome2=ocrResult;
+  return 0;
+}
+int quadro()
+{
+	int i =0;
+
+	Mat frame;
+	Mat resized_frame;
+	Mat grayscale;
+	Mat grayscalecp;
+	
+	char *outText;
+
+
+	int x=920;
+	int y=1200;
+	int u=400;
+	int l=60;
+	Rect text_rect(x,y,200,20);
+	
+	system("raspistill -o image.jpg -br 50 -sh 100 -sa -100 -ex auto -t 500");
+
+	frame = imread("image.jpg");
+	
+	Rect cut(x,y,u,l);
+	imwrite("aaaaa.png",frame(cut));
+	cvtColor(frame(cut),grayscale,COLOR_RGB2GRAY);
+	
+	imwrite("sample.png",grayscale);
+
+	
+	return 0;
+}
+
+
+int tesste(char* name) {
+ FILE *N_1 = NULL;
+  N_1 = fopen("a.json","r");
+            if(N_1 == NULL){
+                printf("Erro 2: Arquivo de Referência vocabulario_nota1  não pode ser aberto\n");
+            }
+
+char* buffer1 =0;
+long length1;
+if(N_1)
+{
+    fseek(N_1,0,SEEK_END);
+    length1 = ftell(N_1);
+    fseek(N_1,0,SEEK_SET);
+    buffer1 = (char*)malloc(length1);
+    if(buffer1)
+    {
+        fread(buffer1,1,length1,N_1);
+    }
+    fclose(N_1);
+}
+   if (strstr(buffer1,name)!=NULL){
+            printf("Carta localizada!\n");
+			return 0;
+        }
+   else
+   printf("Por favor tente novamente");     
+return -1;
+
+}
