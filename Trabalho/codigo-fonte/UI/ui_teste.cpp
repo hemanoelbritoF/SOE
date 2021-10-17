@@ -838,7 +838,18 @@ char tesse()
                     i, box->x, box->y, box->w, box->h, conf, ocrResult);
     boxDestroy(&box);
   }
-  printf("OCR->%s", ocrResult);
+  int a;
+  //for(int i=0;i<strlen(ocrResult);i++)
+  //{
+	  //if(ocrResult[strlen(ocrResult)-i]>60 && ocrResult[strlen(ocrResult)-i]<123)
+	  //{
+		//a=i;
+		//break;
+	  //}
+  //}
+  //ocrResult[strlen(ocrResult)-(a-1)] = 0;
+  
+  printf("OCR->%s\n", ocrResult);
   // Destroy used object and release memory
   api->End();
   delete api;
@@ -859,20 +870,21 @@ int quadro()
 	char *outText;
 
 
-	int x=920;
+	int x=930;
 	int y=1200;
 	int u=400;
 	int l=60;
 	Rect text_rect(x,y,200,20);
 	
-	system("raspistill -o image.jpg -br 50 -sh 100 -sa -100 -ex auto -t 500");
+	system("raspistill -o image.jpg -br 50 -sh 100 -sa -100 -ex auto -t 500 -q 100");
 
 	frame = imread("image.jpg");
 	
 	Rect cut(x,y,u,l);
 	imwrite("aaaaa.png",frame(cut));
-	cvtColor(frame(cut),grayscale,COLOR_RGB2GRAY);
 	
+	cvtColor(frame(cut),grayscale,COLOR_RGB2GRAY);
+	threshold(grayscale ,grayscale ,200 ,255, THRESH_BINARY+THRESH_OTSU );
 	imwrite("sample.png",grayscale);
 
 	
