@@ -72,6 +72,7 @@ void on_row(GtkButton *);
 void on_row2(GtkButton *);
 void delete_rows();
 void update_list();
+int comparech(const char* str1,const char* str2);
 
 
 //ocr
@@ -156,7 +157,7 @@ void on_m_decks_clicked(GtkButton *b)
 
 void on_m_cards_clicked(GtkButton *b)
 {
-	cd_flag = 2;
+	cd_flag = 3;
 	sprintf(actual_deck, "%s", "AllCards"); 
 	update_list();
 	
@@ -193,7 +194,7 @@ void on_rem_btn_clicked(GtkButton *b)
 		gtk_widget_modify_bg ( GTK_WIDGET(b), GTK_STATE_NORMAL, &color);
 		rem_flag=1;
 	}
-	printf("%d\n",rem_flag);
+	
 }
 void on_exit_btn_clicked (GtkButton *b)
 {
@@ -228,7 +229,7 @@ void on_row(GtkButton *b)
 			strcat(cmd_append,buff);
 			strcat(cmd_append,"d' ");
 			strcat(cmd_append,"aux2.txt > Decks.txt");
-			printf("%s\n",cmd_append);
+			
 			system(cmd_append);
 			
 			//int a;
@@ -239,16 +240,14 @@ void on_row(GtkButton *b)
 			sprintf(file_name, "%s", gtk_button_get_label(b));  
 			strcat(file_name,".txt");
 			strcat(remove_file,file_name);
-			printf("-------%s\n",file_name);
-			printf("-------%s\n",remove_file);
+			
 			system(remove_file);
 			
 			char remove_file2[1024] = "rm q";
 			sprintf(file_name, "%s", gtk_button_get_label(b));  
 			strcat(file_name,".txt");
 			strcat(remove_file2,file_name);
-			printf("-------%s\n",file_name);
-			printf("-------%s\n",remove_file2);
+			
 			system(remove_file2);
 			
 			update_list();
@@ -312,7 +311,7 @@ void on_enter_btn_clicked (GtkButton *b)
 			strcat(end_cmd3,file_name);
 			system(end_cmd3);
 			
-			printf("%s\n",end_cmd3);
+			
 			update_list();
 			
 			gtk_editable_delete_text(GTK_EDITABLE(get_usr_entry),0,-1);
@@ -436,7 +435,7 @@ void update_list()
 		strcat(actual_deck_aux,txt);
 		
 		delete_rows();
-		printf("%s\n",actual_deck_aux);
+		
 		FILE *f1 = fopen(actual_deck_aux, "r");
 		strcat(actual_deck_aux2,actual_deck_aux);
 		FILE *f2 = fopen(actual_deck_aux2, "r");
@@ -462,7 +461,7 @@ void update_list()
 			gtk_grid_insert_row(GTK_GRID(dc_grid), row);
 			strcat(tmp2,"x");
 			strcat(tmp2,tmp);
-			printf("%s\n",tmp2);
+			
 			button[row] = gtk_button_new_with_label(tmp2);
 			gtk_button_set_alignment(GTK_BUTTON(button[row]),0.0,0.5);
 			gtk_grid_attach(GTK_GRID(dc_grid), button[row], 1, row, 1, 1);
@@ -494,7 +493,7 @@ void on_row2(GtkButton *b)
 				
 			}
 			sprintf(buff,"%d",val_n);
-			printf("%d\n",atoi(buff));
+			
 			
 			
 			system("rm aux.txt");
@@ -506,7 +505,7 @@ void on_row2(GtkButton *b)
 			system(cmd_append);
 			
 			FILE *f1 = fopen("aux.txt", "r");
-			printf("file = %s\n",f1);
+			
 			if(f1==NULL)
 			{
 				printf("File error!\n");
@@ -540,7 +539,7 @@ void on_row2(GtkButton *b)
 				
 				if(row == atoi(buff))
 				{
-					printf("-----------chegou aqui0\n");
+					
 					
 					
 					int val = atoi(tmp);
@@ -556,7 +555,7 @@ void on_row2(GtkButton *b)
 					strcat(cmd_append4,"q");
 					strcat(cmd_append4,actual_deck);
 					strcat(cmd_append4,".txt");
-					printf("cmd4:%s\n",cmd_append4);
+					
 					
 					system(cmd_append4);
 					
@@ -568,7 +567,7 @@ void on_row2(GtkButton *b)
 						strcat(cmd_append12,actual_deck);
 						strcat(cmd_append12,".txt");
 						strcat(cmd_append12," aux2.txt");
-						printf("cmd12:%s\n",cmd_append12);
+						
 						system(cmd_append12);
 						
 						char cmd_append11[]="sed '";
@@ -584,7 +583,7 @@ void on_row2(GtkButton *b)
 						strcat(cmd_append14,actual_deck);
 						strcat(cmd_append14,".txt");
 						strcat(cmd_append14," aux2.txt");
-						printf("cmd14:%s\n",cmd_append14);
+						
 						system(cmd_append14);
 						
 						char cmd_append13[]="sed '";
@@ -593,7 +592,7 @@ void on_row2(GtkButton *b)
 						strcat(cmd_append13,"aux2.txt > q");
 						strcat(cmd_append13,actual_deck);
 						strcat(cmd_append13,".txt");
-						printf("cmd13:%s\n",cmd_append13);
+					
 						system(cmd_append13);
 					}
 					
@@ -604,14 +603,14 @@ void on_row2(GtkButton *b)
 				
 					
 					strcat(cmd_append4,tmp);
-					printf("%s\n",cmd_append4);
+			
 					
 					system(cmd_append4);
 					strcat(cmd_append4," >> ");
 					strcat(cmd_append4,"q");
 					strcat(cmd_append4,actual_deck);
 					strcat(cmd_append4,".txt");
-					printf("cmd4:%s\n",cmd_append4);
+					
 					system(cmd_append4);
 				}
 				row++;
@@ -636,7 +635,7 @@ void on_row2(GtkButton *b)
 				
 			}
 			sprintf(buff,"%d",val_n);
-			printf("%d\n",atoi(buff));
+		
 			
 			
 			system("rm aux.txt");
@@ -681,7 +680,7 @@ void on_row2(GtkButton *b)
 				
 				if(row == atoi(buff))
 				{
-					printf("-----------chegou aqui0\n");
+					
 					
 					
 					int val = atoi(tmp);
@@ -689,13 +688,13 @@ void on_row2(GtkButton *b)
 					
 					sprintf(tmp,"%d",val);
 					strcat(cmd_append4,tmp);
-					printf("cmd4%s\n",cmd_append4);
+					
 					
 					strcat(cmd_append4," >> ");
 					strcat(cmd_append4,"q");
 					strcat(cmd_append4,actual_deck);
 					strcat(cmd_append4,".txt");
-					printf("%s\n",cmd_append4);
+					
 					
 					system(cmd_append4);
 					
@@ -707,14 +706,14 @@ void on_row2(GtkButton *b)
 				
 					
 					strcat(cmd_append4,tmp);
-					printf("%s\n",cmd_append4);
+					
 					
 					system(cmd_append4);
 					strcat(cmd_append4," >> ");
 					strcat(cmd_append4,"q");
 					strcat(cmd_append4,actual_deck);
 					strcat(cmd_append4,".txt");
-					printf("cmd4:%s\n",cmd_append4);
+					
 					system(cmd_append4);
 				}
 				row++;
@@ -762,7 +761,7 @@ void on_camera_btn_clicked (GtkButton *b)
 			strcat(actual_deck_q,txt);
 			
 			strcat(append_cmd2, actual_deck_q);
-			printf("%s\n",append_cmd2);
+			
 			system(append_cmd2);
 			update_list();
 	
@@ -779,38 +778,48 @@ void on_back_btn2_clicked (GtkButton *b)
 
 
 int cards() {
-	FILE *N_1 = NULL;
-  N_1 = fopen("a.json","r");
-            if(N_1 == NULL){
-                printf("Erro 2: Arquivo de Referência não pode ser aberto\n");
-            }
-    char NomeArq[300] = "";
-    printf("Digite o nome do arquivo:");
-    //scanf("%s",NomeArq);
+	
+	
+	
+	//FILE *N_1 = NULL;
+  //N_1 = fopen("a.json","r");
+            //if(N_1 == NULL){
+                //printf("Erro 2: Arquivo de Referência não pode ser aberto\n");
+            //}
+    
+
     quadro();
     tesse();
-
-char* buffer1 =0;
-long length1;
-if(N_1)
-{
-    fseek(N_1,0,SEEK_END);
-    length1 = ftell(N_1);
-    fseek(N_1,0,SEEK_SET);
-    buffer1 = (char*)malloc(length1);
-    if(buffer1)
-    {
-        fread(buffer1,1,length1,N_1);
-    }
-	nome2[strlen(nome2)-1]=0;
-
-   if (strstr(buffer1,nome2)!=NULL){
-            printf("Carta localizada!\n");
-			return 1;
-        }
     
-}  
- fclose(N_1);
+    FILE *f1 = fopen("names.txt", "r");
+		if(f1==NULL)
+		{
+			printf("File error!\n");
+			exit(1);
+		}
+		
+		//search for card
+		printf("nome =>%s\n", nome2);
+		while(1)
+		{
+			if(fgets(tmp,1024,f1)==NULL)
+			{
+				fclose(f1);
+				break;
+			}
+			tmp[strlen(tmp)-1] = 0;
+			
+			if (comparech(tmp,nome2)>75)
+			{
+				strcpy(nome2,tmp);
+				printf("Carta localizada!---->%s\n ",nome2);
+				return 1;
+			}
+		}
+
+
+
+
 
 return -1;
 }
@@ -838,7 +847,18 @@ char tesse()
                     i, box->x, box->y, box->w, box->h, conf, ocrResult);
     boxDestroy(&box);
   }
-  printf("OCR->%s", ocrResult);
+  int a;
+  //for(int i=0;i<strlen(ocrResult);i++)
+  //{
+	  //if(ocrResult[strlen(ocrResult)-i]>60 && ocrResult[strlen(ocrResult)-i]<123)
+	  //{
+		//a=i;
+		//break;
+	  //}
+  //}
+  //ocrResult[strlen(ocrResult)-(a-1)] = 0;
+  
+  printf("OCR->%s\n", ocrResult);
   // Destroy used object and release memory
   api->End();
   delete api;
@@ -859,20 +879,21 @@ int quadro()
 	char *outText;
 
 
-	int x=920;
-	int y=1200;
+	int x=930;
+	int y=1180;
 	int u=400;
 	int l=60;
 	Rect text_rect(x,y,200,20);
 	
-	system("raspistill -o image.jpg -br 50 -sh 100 -sa -100 -ex auto -t 500");
+	system("raspistill -o image.jpg -br 50 -sh 100 -sa -100 -ex auto -t 700 -q 100");
 
 	frame = imread("image.jpg");
 	
 	Rect cut(x,y,u,l);
 	imwrite("aaaaa.png",frame(cut));
-	cvtColor(frame(cut),grayscale,COLOR_RGB2GRAY);
 	
+	cvtColor(frame(cut),grayscale,COLOR_RGB2GRAY);
+	threshold(grayscale ,grayscale ,200 ,255, THRESH_BINARY+THRESH_OTSU );
 	imwrite("sample.png",grayscale);
 
 	
@@ -910,3 +931,36 @@ if(N_1)
 return -1;
 
 }
+
+int comparech(const char* str1,const char* str2)
+{
+    int diff =0;
+    if(strlen(str1)>strlen(str2))
+    {
+        
+        for(int i=0;i<strlen(str2);i++)
+        {
+            if(str1[i]-str2[i]!=0)
+            {
+                diff++;
+            }
+        }
+        
+       
+        return 100 - (diff*100)/(int)strlen(str2);
+    }
+    else
+    {
+         for(int i=0;i<strlen(str1);i++)
+        {
+            if(str1[i]-str2[i]!=0)
+            {
+                diff++;
+            }
+        }
+        
+        
+        return 100 - (diff*100)/(int)strlen(str1);
+    }
+}
+
