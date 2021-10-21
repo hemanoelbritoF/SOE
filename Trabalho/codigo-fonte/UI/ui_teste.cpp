@@ -780,18 +780,10 @@ void on_back_btn2_clicked (GtkButton *b)
 int cards() {
 	
 	
-	
-	//FILE *N_1 = NULL;
-  //N_1 = fopen("a.json","r");
-            //if(N_1 == NULL){
-                //printf("Erro 2: Arquivo de Referência não pode ser aberto\n");
-            //}
-    
-
     quadro();
     tesse();
     
-    FILE *f1 = fopen("names.txt", "r");
+    FILE *f1 = fopen("names2.txt", "r");
 		if(f1==NULL)
 		{
 			printf("File error!\n");
@@ -808,8 +800,9 @@ int cards() {
 				break;
 			}
 			tmp[strlen(tmp)-1] = 0;
+			int diff = comparech(tmp,nome2);
 			
-			if (comparech(tmp,nome2)>75)
+			if (diff>80)
 			{
 				strcpy(nome2,tmp);
 				printf("Carta localizada!---->%s\n ",nome2);
@@ -848,15 +841,6 @@ char tesse()
     boxDestroy(&box);
   }
   int a;
-  //for(int i=0;i<strlen(ocrResult);i++)
-  //{
-	  //if(ocrResult[strlen(ocrResult)-i]>60 && ocrResult[strlen(ocrResult)-i]<123)
-	  //{
-		//a=i;
-		//break;
-	  //}
-  //}
-  //ocrResult[strlen(ocrResult)-(a-1)] = 0;
   
   printf("OCR->%s\n", ocrResult);
   // Destroy used object and release memory
@@ -879,8 +863,8 @@ int quadro()
 	char *outText;
 
 
-	int x=930;
-	int y=1180;
+	int x=970;
+	int y=1210;
 	int u=400;
 	int l=60;
 	Rect text_rect(x,y,200,20);
@@ -935,6 +919,12 @@ return -1;
 int comparech(const char* str1,const char* str2)
 {
     int diff =0;
+    int str1_size = (int)strlen(str1);//tmp
+    int str2_size = (int)strlen(str2);//input
+    if(str2_size+1<str1_size)
+    {
+		return 0;
+	}
     if(strlen(str1)>strlen(str2))
     {
         
@@ -947,7 +937,7 @@ int comparech(const char* str1,const char* str2)
         }
         
        
-        return 100 - (diff*100)/(int)strlen(str2);
+        return 100 - (diff*100)/str1_size;
     }
     else
     {
@@ -960,7 +950,7 @@ int comparech(const char* str1,const char* str2)
         }
         
         
-        return 100 - (diff*100)/(int)strlen(str1);
+        return 100 - (diff*100)/str1_size;
     }
 }
 
