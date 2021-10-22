@@ -881,7 +881,6 @@ int cards() {
 		{
 			if(fgets(tmp,1024,f1)==NULL)
 			{
-				fclose(f1);
 				break;
 			}
 			tmp[strlen(tmp)-1] = 0;
@@ -891,11 +890,12 @@ int cards() {
 			{
 				strcpy(nome2,tmp);
 				printf("Carta localizada!---->%s\n ",nome2);
+				fclose(f1);
 				return 1;
 			}
 		}
 
-
+fclose(f1);
 
 
 
@@ -928,15 +928,15 @@ char *outText;
     boxDestroy(&box);
   }
   int a;
-  if(ocrResult==NULL)
-	strcpy(nome2,"A");
+  //if(ocrResult==NULL)
+	//strcpy(nome2,"A");
   printf("OCR->%s\n", ocrResult);
   // Destroy used object and release memory
   api->End();
   delete api;
   delete [] outText;
   pixDestroy(&image);
-    nome2=ocrResult;
+  nome2=ocrResult;
   return 0;
 }
 int quadro()
@@ -951,8 +951,8 @@ int quadro()
 	char *outText;
 
 
-	int x=970;
-	int y=1220;
+	int x=945;
+	int y=1200;
 	int u=580;
 	int l=63;
 	//Rect text_rect(x,y,200,20);
@@ -1003,7 +1003,8 @@ if(N_1)
 			return 0;
         }
    else
-   printf("Por favor tente novamente");     
+   printf("Por favor tente novamente");    
+   free(buffer1);
 return -1;
 
 }
