@@ -8,7 +8,7 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/core.hpp"
 #include <pthread.h>
-
+#include <cstddef>
 
 
 //window
@@ -86,7 +86,7 @@ int tesste(char *name);
 
 
 int main(int argc, char *argv[])
-{
+{	system("export LC_ALL=C");
 	gtk_init(&argc, &argv);
 	
 	
@@ -135,7 +135,10 @@ int main(int argc, char *argv[])
 	
 	//start window
 	
-	
+	//mudar cor do rem_btn
+	GdkColor color;
+	gdk_color_parse ("blue", &color);
+	gtk_widget_modify_bg ( rem_btn, GTK_STATE_NORMAL, &color);
 	
 	gtk_widget_show(window);
 	gtk_widget_hide(text_entry);
@@ -164,7 +167,7 @@ void on_m_cards_clicked(GtkButton *b)
 }
 void on_add_btn_clicked(GtkButton *b)
 {
-	if(cd_flag == 1)
+	if(cd_flag == 1 || cd_flag == 3)
 	{
 		gtk_widget_show_all(text_entry);
 	}
@@ -232,10 +235,6 @@ void on_row(GtkButton *b)
 			
 			system(cmd_append);
 			
-			//int a;
-			//scanf("%d",&a);
-			
-			
 			char remove_file[1024] = "rm ";
 			sprintf(file_name, "%s", gtk_button_get_label(b));  
 			strcat(file_name,".txt");
@@ -258,10 +257,7 @@ void on_row(GtkButton *b)
 	{
 		
 		sprintf(actual_deck, "%s", gtk_button_get_label(b)); 
-		printf("%s\n",actual_deck);
 		//reset grid
-		
-		
 		update_list();
 		cd_flag = 2; 
 	}
@@ -371,6 +367,50 @@ void on_enter_btn_clicked (GtkButton *b)
 			
 	}
 	
+	if(cd_flag==3)
+	{
+			char txt[] = ".txt";
+			char card_name[1024];
+			
+			char file_name[1024], file_namecp[1024];
+			char append_cmd[1024] = "echo ";
+			char append_cmd2[1024] = "echo ";
+			char actual_deck_q[1024] = "q";
+			char actual_deck_aux[1024] = "q";
+			char actual_deck_aux2[1024] = "q";
+			
+			strcpy(actual_deck_aux,"AllCards");
+			strcpy(actual_deck_aux2,"AllCards");
+			
+			
+			strcat(actual_deck_aux, txt);
+			
+			sprintf(card_name, "%s",  gtk_entry_get_text(GTK_ENTRY(get_usr_entry)));  
+			int flag_card=tesste(card_name);
+			if(flag_card < 0){
+				return;
+			}
+			//add card to deck
+			strcat(append_cmd, card_name);
+			strcat(append_cmd, ">>");
+			strcat(append_cmd, actual_deck_aux);
+			system(append_cmd);
+			
+			strcat(append_cmd2, "1");
+			strcat(append_cmd2, " >> ");
+			strcat(actual_deck_q,actual_deck_aux2);
+			strcat(actual_deck_q,txt);
+			
+			strcat(append_cmd2, actual_deck_q);
+			printf("%s\n",append_cmd2);
+			system(append_cmd2);
+			
+			//make buttons and append to grid
+			gtk_editable_delete_text(GTK_EDITABLE(get_usr_entry),0,-1);
+			gtk_widget_hide(text_entry);
+			update_list();
+	}
+	
 	
 }
 
@@ -432,6 +472,52 @@ void update_list()
 		char actual_deck_aux[1024] = "q";
 		char actual_deck_aux2[1024] = "q";
 		strcpy(actual_deck_aux,actual_deck);
+		strcat(actual_deck_aux,txt);
+		
+		delete_rows();
+		
+		FILE *f1 = fopen(actual_deck_aux, "r");
+		strcat(actual_deck_aux2,actual_deck_aux);
+		FILE *f2 = fopen(actual_deck_aux2, "r");
+		if(f1==NULL||f2==NULL)
+		{
+			printf("File error!\n");
+			exit(1);
+		}
+		
+		//make buttons and append to grid
+		row=0;
+		while(1)
+		{
+			if(fgets(tmp,1024,f1)==NULL||fgets(tmp2,1024,f2)==NULL)
+			{
+				fclose(f1);
+				fclose(f2);
+				break;
+			}
+			tmp[strlen(tmp)-1] = 0;
+			tmp2[strlen(tmp2)-1] = 0;
+			
+			gtk_grid_insert_row(GTK_GRID(dc_grid), row);
+			strcat(tmp2,"x");
+			strcat(tmp2,tmp);
+			
+			button[row] = gtk_button_new_with_label(tmp2);
+			gtk_button_set_alignment(GTK_BUTTON(button[row]),0.0,0.5);
+			gtk_grid_attach(GTK_GRID(dc_grid), button[row], 1, row, 1, 1);
+			g_signal_connect(button[row], "clicked", G_CALLBACK(on_row2),NULL);
+			gtk_widget_show(button[row]);
+			row++;
+			
+			
+		}
+	}
+	if(cd_flag == 3)
+	{
+		char txt[] = ".txt";
+		char actual_deck_aux[1024] = "q";
+		char actual_deck_aux2[1024] = "q";
+		strcpy(actual_deck_aux,"AllCards");
 		strcat(actual_deck_aux,txt);
 		
 		delete_rows();
@@ -549,7 +635,7 @@ void on_row2(GtkButton *b)
 					
 					sprintf(tmp,"%d",val);
 					strcat(cmd_append4,tmp);
-					printf("cmd4%s\n",cmd_append4);
+					
 					
 					strcat(cmd_append4," >> ");
 					strcat(cmd_append4,"q");
@@ -727,7 +813,6 @@ void on_camera_btn_clicked (GtkButton *b)
 {
 	flag_card = cards();
 	if(flag_card < 0){
-		printf("entrou na função\n");
 			return;
 			}
 			
@@ -819,29 +904,32 @@ return -1;
 char tesse()
 {
 
-  char *outText;
+char *outText;
   tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
   // Initialize tesseract-ocr with English, without specifying tessdata path
-  if (api->Init(NULL, "eng")) {
+ if (api->Init(NULL, "eng")) {
       fprintf(stderr, "Could not initialize tesseract.\n");
       exit(1);
-  }
+    }
   Pix *image = pixRead("sample.png");
+  api->SetPageSegMode(tesseract::PSM_AUTO);
   api->SetImage(image);
+  api->Recognize(0);
   Boxa* boxes = api->GetComponentImages(tesseract::RIL_TEXTLINE, true, NULL, NULL);
-  printf("Found %d textline image components.\n", boxes->n);
+  //printf("Found %d textline image components.\n", boxes->n);
   char* ocrResult;
   for (int i = 0; i < boxes->n; i++) {
     BOX* box = boxaGetBox(boxes, i, L_CLONE);
     api->SetRectangle(box->x, box->y, box->w, box->h);
     ocrResult = api->GetUTF8Text();
     int conf = api->MeanTextConf();
-    fprintf(stdout, "Box[%d]: x=%d, y=%d, w=%d, h=%d, confidence: %d, text: %s",
-                    i, box->x, box->y, box->w, box->h, conf, ocrResult);
+    //fprintf(stdout, "Box[%d]: x=%d, y=%d, w=%d, h=%d, confidence: %d, text: %s",
+                    //i, box->x, box->y, box->w, box->h, conf, ocrResult);
     boxDestroy(&box);
   }
   int a;
-  
+  if(ocrResult==NULL)
+	strcpy(nome2,"A");
   printf("OCR->%s\n", ocrResult);
   // Destroy used object and release memory
   api->End();
@@ -864,10 +952,10 @@ int quadro()
 
 
 	int x=970;
-	int y=1210;
-	int u=400;
-	int l=60;
-	Rect text_rect(x,y,200,20);
+	int y=1220;
+	int u=580;
+	int l=63;
+	//Rect text_rect(x,y,200,20);
 	
 	system("raspistill -o image.jpg -br 50 -sh 100 -sa -100 -ex auto -t 700 -q 100");
 
@@ -878,6 +966,10 @@ int quadro()
 	
 	cvtColor(frame(cut),grayscale,COLOR_RGB2GRAY);
 	threshold(grayscale ,grayscale ,200 ,255, THRESH_BINARY+THRESH_OTSU );
+	double scale_up_x = 2.2;
+	double scale_up_y = 2.2;
+	Mat scaled_f_up;
+	resize(grayscale, scaled_f_up, Size(), scale_up_x, scale_up_y, INTER_NEAREST);
 	imwrite("sample.png",grayscale);
 
 	
@@ -887,7 +979,7 @@ int quadro()
 
 int tesste(char* name) {
  FILE *N_1 = NULL;
-  N_1 = fopen("a.json","r");
+  N_1 = fopen("names.txt","r");
             if(N_1 == NULL){
                 printf("Erro 2: Arquivo de Referência vocabulario_nota1  não pode ser aberto\n");
             }

@@ -21,11 +21,10 @@
             <property name="homogeneous">True</property>
             <child>
               <object class="GtkButton" id="m_decks">
-                <property name="label" translatable="yes">Meus Decks</property>
+                <property name="label" translatable="yes">Minhas coleções</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_m_decks_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -35,12 +34,11 @@
             </child>
             <child>
               <object class="GtkButton" id="m_cards">
-                <property name="label" translatable="yes">Minhas cartas</property>
+                <property name="label" translatable="yes">Outras cartas</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="image_position">right</property>
-                <signal name="clicked" handler="on_m_cards_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -66,7 +64,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_add_btn_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -80,7 +77,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_rem_btn_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -94,7 +90,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_exit_btn_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -125,6 +120,30 @@
                     <property name="can_focus">False</property>
                     <property name="column_homogeneous">True</property>
                     <property name="baseline_row">1</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
                     <child>
                       <placeholder/>
                     </child>
@@ -187,7 +206,7 @@
             </child>
             <child>
               <object class="GtkButton" id="back_btn2">
-                <property name="label" translatable="yes">button</property>
+                <property name="label" translatable="yes">Voltar</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
